@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline Acquisition — Ayke Solutions</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{color-scheme:light;--navy:#1a2744;--blue:#1565C0;--coral:#e8845c;--teal:#2ec4b6;--ink:#1e2432;--grey:#5b6472;--line:#e4e9f1;--bg:#f6f8fc;--card:#ffffff;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+.wrap{max-width:1080px;margin:0 auto;padding:20px}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:10px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
+.logo span{color:var(--coral)}
+h1{font-size:18px;color:var(--navy);font-weight:800;letter-spacing:.2px}
+.sub{font-size:12px;color:var(--grey)}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi .v{font-size:24px;font-weight:800;color:var(--navy)}
+.kpi .l{font-size:11px;color:var(--grey);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+.kpi.accent .v{color:var(--coral)}
+.kpi.teal .v{color:#1aa294}
+.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--grey);margin-bottom:12px}
+.chartbox{position:relative;height:230px}
+.charts3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}
+.charts3 .chartbox{height:200px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--grey)}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+select.stage{border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:12px;background:#fff;color:var(--ink)}
+.row-actions button{border:none;background:none;cursor:pointer;color:var(--grey);font-size:14px;padding:2px 5px;border-radius:6px}
+.row-actions button:hover{background:#f0f0f0;color:#c0392b}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.btn{background:var(--coral);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--navy)}
+.btn:hover{filter:brightness(.96)}
+input,select.f{border:1px solid var(--line);border-radius:9px;padding:9px;font-size:13px;width:100%;background:#fff;color:var(--ink)}
+.form{display:none;grid-template-columns:repeat(4,1fr);gap:10px;background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.form.open{display:grid}
+.form .full{grid-column:1/-1}
+.actions-list{list-style:none}
+.actions-list li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.actions-list .who{font-weight:700;color:var(--navy)}
+.actions-list .what{color:var(--grey)}
+.muted{color:var(--grey);font-size:12px}
+.foot{font-size:11px;color:var(--grey);text-align:center;margin-top:14px;line-height:1.6}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2,.charts3,.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">A<span>·</span></div>
+      <div><h1>Pipeline Acquisition</h1><div class="sub">Ayke Solutions — tableau de bord de prospection</div></div>
+    </div>
+    <div class="toolbar" style="margin:0">
+      <button class="btn" id="addBtn">+ Nouveau prospect</button>
+      <button class="btn ghost" id="resetBtn" title="Recharger les exemples">↺ Réinitialiser</button>
+    </div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div id="addForm" class="form">
+    <input id="f_name" placeholder="Nom du prospect *">
+    <input id="f_company" placeholder="Entreprise">
+    <select id="f_segment" class="f"><option>PME locale</option><option>E-commerce</option><option>Partenaire</option></select>
+    <select id="f_stage" class="f"><option>Nouveau</option><option>Contacté</option><option>Appel booké</option><option>Proposition</option><option>Gagné</option><option>Perdu</option></select>
+    <select id="f_channel" class="f"><option>Outbound email</option><option>LinkedIn</option><option>Référral</option><option>Malt</option><option>Klaviyo Directory</option><option>GBP / SEO</option><option>Ads</option><option>Site web</option><option>Autre</option></select>
+    <select id="f_score" class="f"><option>🔥 Chaud</option><option>🌤️ Tiède</option><option>❄️ Froid</option></select>
+    <input id="f_value" type="number" placeholder="Valeur estimée (CHF)">
+    <input id="f_city" placeholder="Ville / Zone">
+    <input id="f_action" class="full" placeholder="Prochaine action (ex: relance email J3)">
+    <div class="full" style="display:flex;gap:8px"><button class="btn" id="saveBtn">Enregistrer</button><button class="btn ghost" id="cancelBtn">Annuler</button></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h2>Entonnoir par étape</h2><div class="chartbox"><canvas id="stageChart"></canvas></div></div>
+    <div class="card"><h2>Actions de la semaine</h2><ul class="actions-list" id="actions"></ul></div>
+  </div>
+
+  <div class="charts3">
+    <div class="card"><h2>Par segment</h2><div class="chartbox"><canvas id="segChart"></canvas></div></div>
+    <div class="card"><h2>Par canal source</h2><div class="chartbox"><canvas id="chanChart"></canvas></div></div>
+    <div class="card"><h2>Valeur pipeline (CHF)</h2><div class="chartbox"><canvas id="valChart"></canvas></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Tous les prospects</h2>
+    <table>
+      <thead><tr><th>Prospect</th><th>Segment</th><th>Canal</th><th>Score</th><th>Valeur</th><th>Prochaine action</th><th>Étape</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <div class="foot">
+    Données enregistrées localement dans ce tableau de bord (persistantes entre les sessions).<br>
+    CRM complet synchronisé dans Notion « Pipeline Acquisition — Ayke Solutions ». La synchronisation live Notion↔dashboard nécessite un plan Notion Business+.
+  </div>
+</div>
+
+<script>
+const STAGES=["Nouveau","Contacté","Appel booké","Proposition","Gagné","Perdu"];
+const STAGE_COLORS={"Nouveau":"#9aa6b8","Contacté":"#1565C0","Appel booké":"#7c5cd6","Proposition":"#e8845c","Gagné":"#2ec4b6","Perdu":"#d05a6e"};
+const SEG_COLORS={"PME locale":"#eab308","E-commerce":"#ec4899","Partenaire":"#a16207"};
+const SCORE_COLORS={"🔥 Chaud":"#fde2da","🌤️ Tiède":"#fdf0d9","❄️ Froid":"#dceaf7"};
+const SEED=[
+ {name:"[Exemple] Menuiserie Dubois",company:"Menuiserie Dubois Sàrl",segment:"PME locale",stage:"Contacté",channel:"Outbound email",score:"🌤️ Tiède",value:4500,city:"Nyon (VD)",action:"Relance email J3"},
+ {name:"[Exemple] Atelier Plomberie Marti",company:"Marti & Fils",segment:"PME locale",stage:"Nouveau",channel:"GBP / SEO",score:"❄️ Froid",value:5000,city:"Genève",action:"1er email outbound"},
+ {name:"[Exemple] Bloom Skincare",company:"Bloom Skincare",segment:"E-commerce",stage:"Appel booké",channel:"LinkedIn",score:"🔥 Chaud",value:6000,city:"",action:"Appel découverte vendredi 10h"},
+ {name:"[Exemple] Studio Web Helvetia",company:"Studio Web Helvetia",segment:"Partenaire",stage:"Proposition",channel:"Référral",score:"🔥 Chaud",value:0,city:"Lausanne",action:"Envoyer accord d'apport 10%"},
+ {name:"[Exemple] Pure&Co Cosmetics",company:"Pure&Co",segment:"E-commerce",stage:"Gagné",channel:"Malt",score:"🔥 Chaud",value:5500,city:"",action:"Onboarding — setup Klaviyo"},
+ {name:"[Exemple] Garage Léman Auto",company:"Léman Auto",segment:"PME locale",stage:"Perdu",channel:"Ads",score:"❄️ Froid",value:3000,city:"Morges",action:"Relancer dans 3 mois"}
+];
+const KEY="ayke_pipeline_v1";
+let data=load();
+function load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):SEED.slice()}catch(e){return SEED.slice()}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+let charts={};
+
+function fmt(n){return new Intl.NumberFormat('fr-CH').format(n||0)}
+function countBy(key){const m={};data.forEach(d=>{m[d[key]]=(m[d[key]]||0)+1});return m}
+
+function renderKPIs(){
+  const total=data.length;
+  const hot=data.filter(d=>d.score==="🔥 Chaud").length;
+  const open=data.filter(d=>!["Gagné","Perdu"].includes(d.stage));
+  const pipeVal=open.reduce((s,d)=>s+(+d.value||0),0);
+  const booked=data.filter(d=>d.stage==="Appel booké").length;
+  const won=data.filter(d=>d.stage==="Gagné").length;
+  const contacted=data.filter(d=>!["Nouveau"].includes(d.stage)).length;
+  const conv=contacted?Math.round(won/contacted*100):0;
+  const k=[
+   {v:total,l:"Prospects"},
+   {v:hot,l:"Leads chauds",c:"accent"},
+   {v:booked,l:"Appels bookés"},
+   {v:"CHF "+fmt(pipeVal),l:"Pipeline ouvert",c:"teal"},
+   {v:won,l:"Gagnés",c:"teal"},
+   {v:conv+"%",l:"Taux conv."}
+  ];
+  document.getElementById('kpis').innerHTML=k.map(x=>`<div class="kpi ${x.c||''}"><div class="v">${x.v}</div><div class="l">${x.l}</div></div>`).join('');
+}
+
+function renderActions(){
+  const open=data.filter(d=>!["Gagné","Perdu"].includes(d.stage)&&d.action);
+  const el=document.getElementById('actions');
+  if(!open.length){el.innerHTML='<li class="muted">Aucune action en attente 🎉</li>';return}
+  el.innerHTML=open.map(d=>`<li><span class="who">${esc(d.name)}</span><span class="what">${esc(d.action)}</span></li>`).join('');
+}
+
+function renderRows(){
+  document.getElementById('rows').innerHTML=data.map((d,i)=>{
+    const opts=STAGES.map(s=>`<option ${s===d.stage?'selected':''}>${s}</option>`).join('');
+    return `<tr>
+      <td><strong>${esc(d.name)}</strong><div class="muted">${esc(d.company||'')}${d.city?' · '+esc(d.city):''}</div></td>
+      <td><span class="tag" style="background:${SEG_COLORS[d.segment]||'#eee'};color:#3a2c00">${esc(d.segment)}</span></td>
+      <td>${esc(d.channel)}</td>
+      <td><span class="tag" style="background:${SCORE_COLORS[d.score]||'#eee'}">${esc(d.score)}</span></td>
+      <td>${d.value?('CHF '+fmt(d.value)):'—'}</td>
+      <td class="muted">${esc(d.action||'')}</td>
+      <td><select class="stage" data-i="${i}">${opts}</select></td>
+      <td class="row-actions"><button data-del="${i}" title="Supprimer">✕</button></td>
+    </tr>`;
+  }).join('');
+  document.querySelectorAll('select.stage').forEach(s=>s.onchange=e=>{data[+e.target.dataset.i].stage=e.target.value;save();renderAll()});
+  document.querySelectorAll('button[data-del]').forEach(b=>b.onclick=e=>{if(confirm('Supprimer ce prospect ?')){data.splice(+e.target.dataset.del,1);save();renderAll()}});
+}
+
+function doughnut(id,labels,vals,colors){
+  const ctx=document.getElementById(id);
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}});
+}
+function bar(id,labels,vals,color){
+  const ctx=document.getElementById(id);
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:color,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{precision:0}}}}});
+}
+
+function renderCharts(){
+  const sc=countBy('stage');
+  doughnut('stageChart',STAGES.filter(s=>sc[s]),STAGES.filter(s=>sc[s]).map(s=>sc[s]),STAGES.filter(s=>sc[s]).map(s=>STAGE_COLORS[s]));
+  const seg=countBy('segment');
+  doughnut('segChart',Object.keys(seg),Object.values(seg),Object.keys(seg).map(s=>SEG_COLORS[s]||'#1565C0'));
+  const ch=countBy('channel');
+  bar('chanChart',Object.keys(ch),Object.values(ch),'#1565C0');
+  const valByStage={};data.filter(d=>!["Perdu"].includes(d.stage)).forEach(d=>{valByStage[d.stage]=(valByStage[d.stage]||0)+(+d.value||0)});
+  const vl=STAGES.filter(s=>valByStage[s]);
+  bar('valChart',vl,vl.map(s=>valByStage[s]),'#e8845c');
+}
+
+function renderAll(){renderKPIs();renderActions();renderRows();renderCharts()}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+const form=document.getElementById('addForm');
+document.getElementById('addBtn').onclick=()=>form.classList.toggle('open');
+document.getElementById('cancelBtn').onclick=()=>form.classList.remove('open');
+document.getElementById('saveBtn').onclick=()=>{
+  const name=document.getElementById('f_name').value.trim();
+  if(!name){alert('Le nom du prospect est requis');return}
+  data.unshift({name,company:document.getElementById('f_company').value.trim(),segment:document.getElementById('f_segment').value,
+    stage:document.getElementById('f_stage').value,channel:document.getElementById('f_channel').value,score:document.getElementById('f_score').value,
+    value:+document.getElementById('f_value').value||0,city:document.getElementById('f_city').value.trim(),action:document.getElementById('f_action').value.trim()});
+  save();['f_name','f_company','f_value','f_city','f_action'].forEach(id=>document.getElementById(id).value='');
+  form.classList.remove('open');renderAll();
+};
+document.getElementById('resetBtn').onclick=()=>{if(confirm('Recharger les 6 prospects-exemples ? (efface vos saisies locales)')){data=SEED.slice();save();renderAll()}};
+
+renderAll();
+</script>
+</body>
+</html>
